@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Student Dashboard</h1>
+        <h2>Add new student</h2>
+        <form id="studentForm">
+            <div class="form-group">
+                <label for="Name">Name</label>
+                <input type="text" class="form-control" id="Name" required>
+            </div>
+            <div class="form-group">
+                <label for="StudyProgram">Study Program</label>
+                <input type="text" class="form-control" id="StudyProgram" required>
+            </div>
+            <div class="form-group">
+                <label for="Attending">Attending</label>
+                <select class="form-control" id="Attending">
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <h2>Current Students</h2>
+        <button class="btn btn-secondary" onclick="loadStudents()">Load students</button>
+        <table class="table mt-3" id="studentsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Study Program</th>
+                    <th>Attending</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+        document.getElementById('studentForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const name = document.getElementById('Name').value;
+            const studyProgram = document.getElementById('StudyProgram').value;
+            const attending = document.getElementById('Attending').value;
+
+            fetch('/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ Name: name, StudyProgram: studyProgram, Attending: attending })
+            }).then(response => response.json())
+                .then(data => console.log(data));
+        });
+
+        function loadStudents() {
+            fetch('/students')
+                .then(response => response.json())
+                .then(students => {
+                    const tbody = document.querySelector('#studentsTable tbody');
+                    tbody.innerHTML = '';
+                    students.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${student.Id}</td>
+                            <td>${student.Name}</td>
+                            <td>${student.StudyProgram}</td>
+                            <td>${student.Attending}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching student data:', error));
+        }
+    </script>
+</body>
+</html>
